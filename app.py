@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
 st.set_page_config(
     page_title="Mental Health in Technology",
@@ -8,6 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
+# Title
 st.title("🧠 Mental Health in Technology")
 st.subheader("Exploratory Data Analysis Dashboard")
 
@@ -15,11 +15,11 @@ st.write(
     "This dashboard explores mental health treatment patterns "
     "among employees in technology workplaces."
 )
+
 # Load cleaned dataset
 df = pd.read_csv("data/cleaned_mental_health.csv")
 
 # Sidebar Filters
-
 st.sidebar.header("🔎 Filters")
 
 selected_country = st.sidebar.selectbox(
@@ -42,9 +42,7 @@ selected_treatment = st.sidebar.selectbox(
     ["All"] + sorted(df["treatment"].dropna().unique().tolist())
 )
 
-
 # Apply Filters
-
 filtered_df = df.copy()
 
 if selected_country != "All":
@@ -69,14 +67,21 @@ if selected_treatment != "All":
 
 # Dashboard Metrics
 total_employees = len(filtered_df)
-treated_employees = (filtered_df["treatment"] == "Yes").sum()
-not_treated_employees = (filtered_df["treatment"] == "No").sum()
+
+treated_employees = (
+    filtered_df["treatment"] == "Yes"
+).sum()
+
+not_treated_employees = (
+    filtered_df["treatment"] == "No"
+).sum()
 
 treatment_rate = (
     (treated_employees / total_employees) * 100
     if total_employees > 0
     else 0
 )
+
 col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
@@ -99,33 +104,25 @@ col4.metric(
     f"{treatment_rate:.1f}%"
 )
 
-# Treatment Distribution Chart
+# --------------------------------------------------
+# Treatment Distribution
+# --------------------------------------------------
 
 st.subheader("Mental Health Treatment Distribution")
 
 treatment_chart = (
     filtered_df["treatment"]
     .value_counts()
-    .reset_index()
+    .rename_axis("Treatment")
+    .to_frame("Count")
 )
 
-treatment_chart.columns = ["Treatment", "Count"]
+st.bar_chart(treatment_chart)
 
-fig = px.bar(
-    treatment_chart,
-    x="Treatment",
-    y="Count",
-    title="Mental Health Treatment Distribution",
-    text="Count"
-)
 
-fig.update_layout(
-    xaxis_title="Treatment",
-    yaxis_title="Number of Employees"
-)
-
-st.plotly_chart(fig, use_container_width=True)
+# --------------------------------------------------
 # Family History vs Treatment
+# --------------------------------------------------
 
 st.subheader("Family History and Mental Health Treatment")
 
@@ -133,27 +130,15 @@ family_chart = (
     filtered_df
     .groupby(["family_history", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_family = px.bar(
-    family_chart,
-    x="family_history",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Family History",
-    text="Count"
-)
+st.bar_chart(family_chart)
 
-fig_family.update_layout(
-    xaxis_title="Family History",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_family, use_container_width=True)
+# --------------------------------------------------
 # Work Interference vs Treatment
+# --------------------------------------------------
 
 st.subheader("Work Interference and Mental Health Treatment")
 
@@ -161,27 +146,15 @@ work_chart = (
     filtered_df
     .groupby(["work_interfere", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_work = px.bar(
-    work_chart,
-    x="work_interfere",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Work Interference",
-    text="Count"
-)
+st.bar_chart(work_chart)
 
-fig_work.update_layout(
-    xaxis_title="Work Interference",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_work, use_container_width=True)
+# --------------------------------------------------
 # Remote Work vs Treatment
+# --------------------------------------------------
 
 st.subheader("Remote Work and Mental Health Treatment")
 
@@ -189,27 +162,15 @@ remote_chart = (
     filtered_df
     .groupby(["remote_work", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_remote = px.bar(
-    remote_chart,
-    x="remote_work",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Remote Work",
-    text="Count"
-)
+st.bar_chart(remote_chart)
 
-fig_remote.update_layout(
-    xaxis_title="Remote Work",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_remote, use_container_width=True)
+# --------------------------------------------------
 # Workplace Benefits vs Treatment
+# --------------------------------------------------
 
 st.subheader("Workplace Benefits and Mental Health Treatment")
 
@@ -217,27 +178,15 @@ benefits_chart = (
     filtered_df
     .groupby(["benefits", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_benefits = px.bar(
-    benefits_chart,
-    x="benefits",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Workplace Benefits",
-    text="Count"
-)
+st.bar_chart(benefits_chart)
 
-fig_benefits.update_layout(
-    xaxis_title="Mental Health Benefits",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_benefits, use_container_width=True)
+# --------------------------------------------------
 # Care Options vs Treatment
+# --------------------------------------------------
 
 st.subheader("Mental Health Care Options and Treatment")
 
@@ -245,27 +194,15 @@ care_chart = (
     filtered_df
     .groupby(["care_options", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_care = px.bar(
-    care_chart,
-    x="care_options",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Care Options",
-    text="Count"
-)
+st.bar_chart(care_chart)
 
-fig_care.update_layout(
-    xaxis_title="Care Options",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_care, use_container_width=True)
+# --------------------------------------------------
 # Wellness Program vs Treatment
+# --------------------------------------------------
 
 st.subheader("Workplace Wellness Program and Mental Health Treatment")
 
@@ -273,27 +210,15 @@ wellness_chart = (
     filtered_df
     .groupby(["wellness_program", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_wellness = px.bar(
-    wellness_chart,
-    x="wellness_program",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Workplace Wellness Program",
-    text="Count"
-)
+st.bar_chart(wellness_chart)
 
-fig_wellness.update_layout(
-    xaxis_title="Wellness Program",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_wellness, use_container_width=True)
+# --------------------------------------------------
 # Country-wise Treatment Analysis
+# --------------------------------------------------
 
 st.subheader("Treatment Patterns by Country")
 
@@ -310,29 +235,15 @@ country_chart = (
     ]
     .groupby(["Country", "treatment"])
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_country = px.bar(
-    country_chart,
-    x="Country",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Top 10 Countries",
-    text="Count"
-)
+st.bar_chart(country_chart)
 
-fig_country.update_layout(
-    xaxis_title="Country",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment",
-    xaxis_tickangle=-45
-)
 
-st.plotly_chart(fig_country, use_container_width=True)
-
+# --------------------------------------------------
 # Age Group vs Treatment
+# --------------------------------------------------
 
 st.subheader("Age Group and Mental Health Treatment")
 
@@ -340,28 +251,15 @@ age_chart = (
     filtered_df
     .groupby(["Age_Group", "treatment"], observed=False)
     .size()
-    .reset_index(name="Count")
+    .unstack(fill_value=0)
 )
 
-fig_age = px.bar(
-    age_chart,
-    x="Age_Group",
-    y="Count",
-    color="treatment",
-    barmode="group",
-    title="Mental Health Treatment by Age Group",
-    text="Count"
-)
+st.bar_chart(age_chart)
 
-fig_age.update_layout(
-    xaxis_title="Age Group",
-    yaxis_title="Number of Employees",
-    legend_title="Treatment"
-)
 
-st.plotly_chart(fig_age, use_container_width=True)
-
+# --------------------------------------------------
 # Key Insights
+# --------------------------------------------------
 
 st.subheader("💡 Key Insights")
 
@@ -382,8 +280,8 @@ Benefits, care options, wellness programs, and help-seeking support provide an o
 Age-group and country-wise analysis helps explore how treatment patterns vary across different employee groups.
 """)
 
-# Footer
 
+# Footer
 st.markdown("---")
 
 st.caption(
